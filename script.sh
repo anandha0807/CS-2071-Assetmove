@@ -21,21 +21,14 @@ read fileid
             sqlcmd -S PRD-DB-02.ics.com -U sa -P 'SQL h@$ N0 =' -h-1 -d ge -Q  "SET QUOTED_IDENTIFIER OFF;set nocount on;
 
 
-            DECLARE @assid INT
+            DECLARE @assid VARCHAR
             set @assid= $i
 
-            declare @tempassets as table (AssetID bigint)
-
-            insert into @tempassets select AssetID from Asset a where a.AssetID IN ($i)
-
-            
-            select CASE WHEN a.NewStorageLocation is NULL THEN CONCAT('/mnt/gestore/ge_storage/ge_assets/',REPLACE (a.StorageFolderPath, '\', '/'),'/','Archive/','*.zip')
-            WHEN a.NewStorageLocation is NOT NULL THEN CONCAT('/mnt/gestore/ge_storage/ge_objects/',REPLACE (a.StorageFolderPath, '\', '/'),'/','Archive/','*.zip')
-			END AS InputZipPath,
-            CASE WHEN a.NewStorageLocation is NULL THEN CONCAT('/mnt/gestore/ge_storage/ge_assets/',REPLACE (a.StorageFolderPath, '\', '/'),'/')
-            WHEN a.NewStorageLocation is NOT NULL THEN CONCAT('/mnt/gestore/ge_storage/ge_objects/',REPLACE (a.StorageFolderPath, '\', '/'),'/')
-			END AS IsilionDestinationPath from Asset a
-			where a.AssetID IN (select * from @tempassets)" -s , -W -k1 >> "$fileid".csv
+            select  a.AssetID,acc.AccountID,acc.AccountName,j.JobName,CONCAT(acc.AccountName,' \ ',j.JobName,' \ ',[dbo].[udf_GetFolderPath](jf.JobFolderID)) as FolderPath,a.Filename from JobFolder jf
+            inner join job j on j.JobID=jf.JobID
+            inner join Asset a on a.JobFolderID=jf.JobFolderID
+            inner join Account acc on acc.AccountID=j.OwnerAccountID
+            where a.AssetID IN (select a.AssetID from Asset a where a.Filename='$i')" -s , -W -k1 >> "$fileid".csv
 
 
             REWRITE="\e[25D\e[1A\e[K"
