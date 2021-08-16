@@ -45,4 +45,4 @@ read fileid
         asset "${array[@]}"
 
 sleep 2s
-echo "input zip has been generated successfully"
+echo "Completed"
