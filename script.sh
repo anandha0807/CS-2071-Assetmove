@@ -28,7 +28,7 @@ read fileid
             inner join job j on j.JobID=jf.JobID
             inner join Asset a on a.JobFolderID=jf.JobFolderID
             inner join Account acc on acc.AccountID=j.OwnerAccountID
-            where a.AssetID IN (select a.AssetID from Asset a where a.Filename='$i')" -s , -W -k1 >> "$fileid".csv
+            where a.AssetID IN (select a.AssetID from Asset a where a.Filename IN ('$i'))" -s , -W -k1 >> "$fileid".csv
 
 
             REWRITE="\e[25D\e[1A\e[K"
