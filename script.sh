@@ -21,14 +21,18 @@ read fileid
             sqlcmd -S PRD-DB-02.ics.com -U sa -P 'SQL h@$ N0 =' -h-1 -d ge -Q  "SET QUOTED_IDENTIFIER OFF;set nocount on;
 
 
-            DECLARE @assid VARCHAR
+            DECLARE @assid nVARCHAR(400)
             set @assid= $i
+
+
+			declare @tempassets as table (AssetID int)
+			insert into @tempassets select a.AssetID from Asset a where a.Filename='$i' and a.DeletetedOn is NULL
 
             select  a.AssetID,acc.AccountID,acc.AccountName,j.JobName,CONCAT(acc.AccountName,' \ ',j.JobName,' \ ',[dbo].[udf_GetFolderPath](jf.JobFolderID)) as FolderPath,a.Filename from JobFolder jf
             inner join job j on j.JobID=jf.JobID
             inner join Asset a on a.JobFolderID=jf.JobFolderID
             inner join Account acc on acc.AccountID=j.OwnerAccountID
-            where a.AssetID IN (select a.AssetID from Asset a where a.Filename IN ('$i'))" -s , -W -k1 >> "$fileid".csv
+            where a.AssetID IN (select * from @tempassets)" -s , -W -k1 >> "$fileid".csv
 
 
             REWRITE="\e[25D\e[1A\e[K"
