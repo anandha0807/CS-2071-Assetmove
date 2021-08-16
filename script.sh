@@ -26,7 +26,7 @@ read fileid
 
 
 			declare @tempassets as table (AssetID int)
-			insert into @tempassets select a.AssetID from Asset a where a.Filename='$i' and a.DeletetedOn is NULL
+			insert into @tempassets select a.AssetID from Asset a where a.Filename=$i and a.DeletetedOn is NULL
 
             select  a.AssetID,acc.AccountID,acc.AccountName,j.JobName,CONCAT(acc.AccountName,' \ ',j.JobName,' \ ',[dbo].[udf_GetFolderPath](jf.JobFolderID)) as FolderPath,a.Filename from JobFolder jf
             inner join job j on j.JobID=jf.JobID
